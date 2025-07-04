@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semester GPA Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .course-entry {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .course-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+        .semester-grades {
+            display: flex;
+            gap: 20px;
+            margin-left: 30px;
+        }
+        .semester {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        select, input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #results {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #e9f7ef;
+            border-radius: 4px;
+            display: none;
+        }
+        #course-container {
+            margin-bottom: 20px;
+        }
+        .remove-btn {
+            background-color: #f44336;
+        }
+        .remove-btn:hover {
+            background-color: #d32f2f;
+        }
+        .semester-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .course-name-input {
+            flex-grow: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Semester GPA Calculator</h1>
+    
+    <div id="course-container">
+        <div class="course-entry" id="course-1">
+            <div class="course-header">
+                <input type="text" class="course-name-input" placeholder="Course Name (optional)">
+                <select class="course-type">
+                    <option value="regular">Regular</option>
+                    <option value="ap">AP/Honors</option>
+                </select>
+                <button class="remove-btn" onclick="removeCourse(1)">Remove Course</button>
+            </div>
+            <div class="semester-grades">
+                <div class="semester">
+                    <div class="semester-label">Semester 1</div>
+                    <input type="text" class="letter-grade semester1" placeholder="Grade (A, B+, etc.)">
+                </div>
+                <div class="semester">
+                    <div class="semester-label">Semester 2</div>
+                    <input type="text" class="letter-grade semester2" placeholder="Grade (A, B+, etc.)">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <button id="add-course">Add Another Course</button>
+    <button id="calculate">Calculate GPA</button>
+    
+    <div id="results">
+        <h2>GPA Results</h2>
+        <div style="display: flex; gap: 30px;">
+            <div>
+                <h3>Semester 1</h3>
+                <p>Unweighted GPA: <span id="unweighted-gpa1">0.00</span></p>
+                <p>Weighted GPA: <span id="weighted-gpa1">0.00</span></p>
+            </div>
+            <div>
+                <h3>Semester 2</h3>
+                <p>Unweighted GPA: <span id="unweighted-gpa2">0.00</span></p>
+                <p>Weighted GPA: <span id="weighted-gpa2">0.00</span></p>
+            </div>
+            <div>
+                <h3>Overall</h3>
+                <p>Unweighted GPA: <span id="unweighted-gpa-total">0.00</span></p>
+                <p>Weighted GPA: <span id="weighted-gpa-total">0.00</span></p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let courseCount = 1;
+        
+        // Add new course field
+        document.getElementById('add-course').addEventListener('click', function() {
+            courseCount++;
+            const newCourse = document.createElement('div');
+            newCourse.className = 'course-entry';
+            newCourse.id = 'course-' + courseCount;
+            newCourse.innerHTML = `
+                <div class="course-header">
+                    <input type="text" class="course-name-input" placeholder="Course Name (optional)">
+                    <select class="course-type">
+                        <option value="regular">Regular</option>
+                        <option value="ap">AP/Honors</option>
+                    </select>
+                    <button class="remove-btn" onclick="removeCourse(${courseCount})">Remove Course</button>
+                </div>
+                <div class="semester-grades">
+                    <div class="semester">
+                        <div class="semester-label">Semester 1</div>
+                        <input type="text" class="letter-grade semester1" placeholder="Grade (A, B+, etc.)">
+                    </div>
+                    <div class="semester">
+                        <div class="semester-label">Semester 2</div>
+                        <input type="text" class="letter-grade semester2" placeholder="Grade (A, B+, etc.)">
+                    </div>
+                </div>
+            `;
+            document.getElementById('course-container').appendChild(newCourse);
+        });
+        
+        // Remove course field
+        function removeCourse(id) {
+            if (courseCount > 1) {
+                const courseToRemove = document.getElementById('course-' + id);
+                courseToRemove.remove();
+                courseCount--;
+            }
+        }
+        
+        // Calculate GPA
+        document.getElementById('calculate').addEventListener('click', function() {
+            const courses = document.querySelectorAll('.course-entry');
+            let semester1 = { unweighted: 0, weighted: 0, count: 0 };
+            let semester2 = { unweighted: 0, weighted: 0, count: 0 };
+            let total = { unweighted: 0, weighted: 0, count: 0 };
+            
+            courses.forEach(course => {
+                const type = course.querySelector('.course-type').value;
+                const grade1 = course.querySelector('.semester1').value.trim().toUpperCase();
+                const grade2 = course.querySelector('.semester2').value.trim().toUpperCase();
+                
+                // Process Semester 1 grade
+                if (grade1) {
+                    const unweightedPoints = getGradePoints(grade1);
+                    if (unweightedPoints !== null) {
+                        let weightedPoints = unweightedPoints;
+                        if (type === 'ap' && ['A', 'B', 'C', 'D', 'F'].includes(grade1.replace(/[+-]/g, ''))) {
+                            weightedPoints += 1.0;
+                        }
+                        
+                        semester1.unweighted += unweightedPoints;
+                        semester1.weighted += weightedPoints;
+                        semester1.count++;
+                        
+                        total.unweighted += unweightedPoints;
+                        total.weighted += weightedPoints;
+                        total.count++;
+                    }
+                }
+                
+                // Process Semester 2 grade
+                if (grade2) {
+                    const unweightedPoints = getGradePoints(grade2);
+                    if (unweightedPoints !== null) {
+                        let weightedPoints = unweightedPoints;
+                        if (type === 'ap' && ['A', 'B', 'C', 'D', 'F'].includes(grade2.replace(/[+-]/g, ''))) {
+                            weightedPoints += 1.0;
+                        }
+                        
+                        semester2.unweighted += unweightedPoints;
+                        semester2.weighted += weightedPoints;
+                        semester2.count++;
+                        
+                        total.unweighted += unweightedPoints;
+                        total.weighted += weightedPoints;
+                        total.count++;
+                    }
+                }
+            });
+            
+            if (total.count > 0) {
+                // Calculate semester GPAs
+                const unweightedGPA1 = semester1.count > 0 ? semester1.unweighted / semester1.count : 0;
+                const weightedGPA1 = semester1.count > 0 ? semester1.weighted / semester1.count : 0;
+                
+                const unweightedGPA2 = semester2.count > 0 ? semester2.unweighted / semester2.count : 0;
+                const weightedGPA2 = semester2.count > 0 ? semester2.weighted / semester2.count : 0;
+                
+                // Calculate overall GPA
+                const unweightedTotal = total.unweighted / total.count;
+                const weightedTotal = total.weighted / total.count;
+                
+                // Display results
+                document.getElementById('unweighted-gpa1').textContent = unweightedGPA1.toFixed(2);
+                document.getElementById('weighted-gpa1').textContent = weightedGPA1.toFixed(2);
+                document.getElementById('unweighted-gpa2').textContent = unweightedGPA2.toFixed(2);
+                document.getElementById('weighted-gpa2').textContent = weightedGPA2.toFixed(2);
+                document.getElementById('unweighted-gpa-total').textContent = unweightedTotal.toFixed(2);
+                document.getElementById('weighted-gpa-total').textContent = weightedTotal.toFixed(2);
+                
+                document.getElementById('results').style.display = 'block';
+            } else {
+                alert('Please enter at least one valid letter grade.');
+            }
+        });
+        
+        // Convert letter grade to grade points
+        function getGradePoints(grade) {
+            const gradeMap = {
+                'A+': 4.0, 'A': 4.0, 'A-': 3.7,
+                'B+': 3.3, 'B': 3.0, 'B-': 2.7,
+                'C+': 2.3, 'C': 2.0, 'C-': 1.7,
+                'D+': 1.3, 'D': 1.0, 'D-': 0.7,
+                'F': 0.0
+            };
+            
+            // Check if grade is valid
+            if (grade in gradeMap) {
+                return gradeMap[grade];
+            }
+            
+            // Try to match grades with optional +/-
+            const baseGrade = grade[0];
+            if (baseGrade && baseGrade in {'A':1, 'B':1, 'C':1, 'D':1, 'F':1}) {
+                const modifier = grade.slice(1);
+                if (modifier === '+' || modifier === '-' || modifier === '') {
+                    const normalizedGrade = baseGrade + (modifier || '');
+                    if (normalizedGrade in gradeMap) {
+                        return gradeMap[normalizedGrade];
+                    }
+                }
+            }
+            
+            return null; // Invalid grade
+        }
+    </script>
+</body>
+</html>
