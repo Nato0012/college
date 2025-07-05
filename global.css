@@ -1,6 +1,6 @@
 .background-container {
   background-image: url('images/background.jpg');
-  backgorund-size: cover;
+  background-size: cover;
   background-position: center;
   height: 100vh;
   position: relative;
