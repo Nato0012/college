@@ -1,1 +1,1 @@
-{"username":"user1","courses":[{"name":"user1","type":"regular","semester1":"A","semester2":"B"}],"timestamp":"2025-07-05T16:10:10.705Z"}
+{"username":"user1","courses":[{"name":"Math","type":"ap","semester1":"A","semester2":"B"},{"name":"English","type":"regular","semester1":"A-","semester2":"A"}],"timestamp":"2025-07-05T16:30:16.795Z","metadata":{"version":"1.0","generator":"GPA Calculator App"}}
