@@ -24,62 +24,26 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             overflow: hidden;
         }
+        .table-header, .course-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+            gap: 10px;
+            align-items: center;
+            justify-items: center;
+        }
         .table-header {
-            display: flex;
             background-color: #4CAF50;
             color: white;
             font-weight: bold;
             padding: 10px 15px;
-        }
-        .header-item {
-            display: flex;
-            justify-content: center;
-            align-items: center;
             text-align: center;
         }
         .course-row {
-            display: flex;
             padding: 10px 15px;
             border-bottom: 1px solid #eee;
-            align-items: center;
         }
         .course-row:last-child {
             border-bottom: none;
-        }
-        .course-name {
-            width: 150px;
-            margin-right: 10px;
-            display: flex;
-            justify-content: center;
-        }
-        .course-type {
-            width: 100px;
-            margin-right: 10px;
-            display: flex;
-            justify-content: center;
-        }
-        .semester-grade {
-            width: 80px;
-            margin-right: 15px;
-            display: flex;
-            justify-content: center;
-        }
-        .remove-btn-container {
-            width: 100px;
-            display: flex;
-            justify-content: center;
-        }
-        .remove-btn {
-            background-color: #f44336;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 5px 10px;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-        .remove-btn:hover {
-            background-color: #d32f2f;
         }
         input, select {
             padding: 8px;
@@ -93,6 +57,7 @@
             display: flex;
             gap: 10px;
             margin: 10px 0;
+            justify-content: center;
         }
         button {
             padding: 8px 15px;
@@ -104,6 +69,13 @@
         }
         button:hover {
             background-color: #45a049;
+        }
+        .remove-btn {
+            background-color: #f44336;
+            white-space: nowrap;
+        }
+        .remove-btn:hover {
+            background-color: #d32f2f;
         }
         #results {
             margin-top: 20px;
@@ -135,32 +107,24 @@
     
     <div class="gpa-table">
         <div class="table-header">
-            <div class="header-item course-name">Course Name</div>
-            <div class="header-item course-type">Type</div>
-            <div class="header-item semester-grade">Semester 1</div>
-            <div class="header-item semester-grade">Semester 2</div>
-            <div class="header-item remove-btn-container">Action</div>
+            <div>Course Name</div>
+            <div>Type</div>
+            <div>Semester 1</div>
+            <div>Semester 2</div>
+            <div>Action</div>
         </div>
         <div id="course-rows">
             <div class="course-row" id="row-1">
-                <div class="course-name">
-                    <input type="text" class="course-name-input" placeholder="Name">
-                </div>
-                <div class="course-type">
+                <div><input type="text" class="course-name-input" placeholder="Name"></div>
+                <div>
                     <select class="course-type-select">
                         <option value="regular">Regular</option>
                         <option value="ap">AP/Honors</option>
                     </select>
                 </div>
-                <div class="semester-grade">
-                    <input type="text" class="letter-grade semester1" placeholder="Grade">
-                </div>
-                <div class="semester-grade">
-                    <input type="text" class="letter-grade semester2" placeholder="Grade">
-                </div>
-                <div class="remove-btn-container">
-                    <button class="remove-btn" onclick="removeCourse(1)">Remove</button>
-                </div>
+                <div><input type="text" class="letter-grade semester1" placeholder="Grade"></div>
+                <div><input type="text" class="letter-grade semester2" placeholder="Grade"></div>
+                <div><button class="remove-btn" onclick="removeCourse(1)">Remove</button></div>
             </div>
         </div>
     </div>
@@ -201,24 +165,16 @@
             newRow.className = 'course-row';
             newRow.id = 'row-' + courseCount;
             newRow.innerHTML = `
-                <div class="course-name">
-                    <input type="text" class="course-name-input" placeholder="Name">
-                </div>
-                <div class="course-type">
+                <div><input type="text" class="course-name-input" placeholder="Name"></div>
+                <div>
                     <select class="course-type-select">
                         <option value="regular">Regular</option>
                         <option value="ap">AP/Honors</option>
                     </select>
                 </div>
-                <div class="semester-grade">
-                    <input type="text" class="letter-grade semester1" placeholder="Grade">
-                </div>
-                <div class="semester-grade">
-                    <input type="text" class="letter-grade semester2" placeholder="Grade">
-                </div>
-                <div class="remove-btn-container">
-                    <button class="remove-btn" onclick="removeCourse(${courseCount})">Remove</button>
-                </div>
+                <div><input type="text" class="letter-grade semester1" placeholder="Grade"></div>
+                <div><input type="text" class="letter-grade semester2" placeholder="Grade"></div>
+                <div><button class="remove-btn" onclick="removeCourse(${courseCount})">Remove</button></div>
             `;
             document.getElementById('course-rows').appendChild(newRow);
         });
