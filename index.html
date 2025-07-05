@@ -152,6 +152,18 @@
             background-color: #f44336;
             color: white;
         }
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+        #find-user-input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+        }
     </style>
 </head>
 <body>
@@ -219,6 +231,10 @@
                 <button id="cancel-modal-btn" class="modal-btn">Cancel</button>
             </div>
         </div>
+    </div>
+    <div class="search-container">
+        <input type="text" id="find-user-input" placeholder="Enter username">
+        <button id="find-user">Find User</button>
     </div>
     
     <script>
@@ -347,6 +363,51 @@
             await saveToGitHub(username, saveData);
             hideGitHubModal();
         }
+
+        async function findUser(username) {
+            try {
+                const response = await fetch(`/api/getUserData?username=${encodeURIComponent(username)}`);
+                if (!response.ok) {
+                    throw new Error(await response.text());
+                }
+                const userData = await response.json();
+                
+                if (userData.courses && userData.courses.length > 0) {
+                    // Clear existing rows
+                    document.getElementById('course-rows').innerHTML = '';
+                    courseCount = 0;
+                    
+                    // Create rows for each course
+                    userData.courses.forEach(course => {
+                        addNewCourse(); // Adds a new row
+                        const currentRow = document.getElementById(`row-${courseCount}`);
+                        
+                        // Fill the row with loaded data
+                        currentRow.querySelector('.course-name-input').value = course.name;
+                        currentRow.querySelector('.course-type-select').value = course.type;
+                        currentRow.querySelector('.semester1').value = course.semester1;
+                        currentRow.querySelector('.semester2').value = course.semester2;
+                    });
+                    
+                    alert(`Loaded data for ${username}`);
+                } else {
+                    alert('No courses found for this user');
+                }
+            } catch (error) {
+                console.error('Find user error:', error);
+                alert(`Error loading user data: ${error.message}`);
+            }
+        }
+        
+        // Add event listener for the Find User button
+        document.getElementById('find-user').addEventListener('click', async () => {
+            const username = document.getElementById('find-user-input').value.trim();
+            if (username) {
+                await findUser(username);
+            } else {
+                alert('Please enter a username');
+            }
+        });
         
         // Calculate GPA
         function calculateGPA() {
