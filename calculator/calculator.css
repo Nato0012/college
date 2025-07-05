@@ -11,7 +11,6 @@ h1 {
 }
 .gpa-table {
     width: 100%;
-    background-color: white;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     overflow: hidden;
@@ -149,10 +148,4 @@ button:hover {
 .cancel-btn {
     background-color: #f44336;
     color: white;
-}
-.background-container {
-  background-image: url('images/background.jpg');
-  background-size: cover;
-  background-position: center;
-  position: relative;
 }
