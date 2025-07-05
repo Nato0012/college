@@ -1,70 +1,66 @@
 export default async (req, res) => {
-    // Set JSON content type immediately
     res.setHeader('Content-Type', 'application/json');
-    
-    if (req.method !== 'POST') {
-        return res.status(405).json({ 
-            success: false,
-            message: 'Method not allowed' 
-        });
-    }
 
     try {
         const { username, data } = req.body;
-        
-        if (!username || !data) {
-            return res.status(400).json({
-                success: false,
-                message: 'Missing username or data'
-            });
-        }
-
         const token = process.env.GITHUB_PAT;
-        if (!token) {
-            return res.status(500).json({
-                success: false,
-                message: 'Server misconfigured'
-            });
-        }
-
         const repo = 'nato0012/college';
         const path = `user/${username}.json`;
         const content = Buffer.from(JSON.stringify(data)).toString('base64');
 
-        const githubResponse = await fetch(
+        // 1. Check if file exists to get SHA
+        let sha = null;
+        const existingResponse = await fetch(
+            `https://api.github.com/repos/${repo}/contents/${path}`,
+            {
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            }
+        );
+
+        if (existingResponse.ok) {
+            const existingData = await existingResponse.json();
+            sha = existingData.sha;
+        } else if (existingResponse.status !== 404) {
+            throw new Error(`GitHub API error: ${existingResponse.statusText}`);
+        }
+
+        // 2. Create/update file
+        const response = await fetch(
             `https://api.github.com/repos/${repo}/contents/${path}`,
             {
                 method: 'PUT',
                 headers: {
                     'Authorization': `token ${token}`,
-                    'Content-Type': 'application/json',
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    message: `Add GPA data for ${username}`,
+                    message: `Update GPA data for ${username}`,
                     content: content,
+                    sha: sha // Will be null for new files
                 }),
             }
         );
 
-        const githubResult = await githubResponse.json();
+        const result = await response.json();
         
-        if (githubResponse.ok) {
-            return res.status(200).json({ 
-                success: true,
-                message: 'Successfully saved to GitHub',
-                url: githubResult.content.html_url
-            });
-        } else {
-            return res.status(githubResponse.status).json({
-                success: false,
-                message: githubResult.message || 'GitHub API error'
-            });
+        if (!response.ok) {
+            throw new Error(result.message || 'GitHub API error');
         }
+
+        return res.status(200).json({ 
+            success: true,
+            html_url: result.content.html_url
+        });
+
     } catch (error) {
-        console.error('API error:', error);
         return res.status(500).json({
             success: false,
-            message: error.message || 'Internal server error'
+            message: error.message,
+            solution: 'If updating, ensure file exists and PAT has write access'
         });
     }
 };
