@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPA Calculator with GitHub Save</title>
+    <title>GPA Calculator with GitHub Integration</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -75,6 +75,9 @@
         #save-data {
             background-color: #FF9800;
         }
+        #load-data {
+            background-color: #9C27B0;
+        }
         button:hover {
             opacity: 0.9;
         }
@@ -108,7 +111,6 @@
             border-bottom: 1px solid #eee;
             padding-bottom: 10px;
         }
-        
         /* Modal styles */
         .modal {
             display: none;
@@ -144,25 +146,17 @@
             padding: 8px 15px;
             cursor: pointer;
         }
-        #save-modal-btn {
+        .save-btn {
             background-color: #4CAF50;
             color: white;
         }
-        #cancel-modal-btn {
-            background-color: #f44336;
+        .load-btn {
+            background-color: #9C27B0;
             color: white;
         }
-        .search-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            justify-content: center;
-        }
-        #find-user-input {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            width: 200px;
+        .cancel-btn {
+            background-color: #f44336;
+            color: white;
         }
     </style>
 </head>
@@ -197,6 +191,7 @@
         <button id="add-course">Add Another Course</button>
         <button id="calculate">Calculate GPA</button>
         <button id="save-data">Save to GitHub</button>
+        <button id="load-data">Load from GitHub</button>
     </div>
     
     <div id="results">
@@ -220,27 +215,35 @@
         </div>
     </div>
     
-    <!-- Modal for GitHub save -->
-    <div id="github-modal" class="modal">
+    <!-- Save Modal -->
+    <div id="save-modal" class="modal">
         <div class="modal-content">
             <h3>Save to GitHub</h3>
             <p>Enter your username:</p>
-            <input type="text" id="github-username" class="modal-input" placeholder="Your Username">
+            <input type="text" id="save-username" class="modal-input" placeholder="Your Username">
             <div class="modal-buttons">
-                <button id="save-modal-btn" class="modal-btn">Save</button>
-                <button id="cancel-modal-btn" class="modal-btn">Cancel</button>
+                <button id="confirm-save-btn" class="modal-btn save-btn">Save</button>
+                <button id="cancel-save-btn" class="modal-btn cancel-btn">Cancel</button>
             </div>
         </div>
     </div>
-    <div class="search-container">
-        <input type="text" id="find-user-input" placeholder="Enter username">
-        <button id="find-user">Find User</button>
+    
+    <!-- Load Modal -->
+    <div id="load-modal" class="modal">
+        <div class="modal-content">
+            <h3>Load from GitHub</h3>
+            <p>Enter username to load:</p>
+            <input type="text" id="load-username" class="modal-input" placeholder="Username to load">
+            <div class="modal-buttons">
+                <button id="confirm-load-btn" class="modal-btn load-btn">Load</button>
+                <button id="cancel-load-btn" class="modal-btn cancel-btn">Cancel</button>
+            </div>
+        </div>
     </div>
     
     <script>
         // Configuration
-        const GITHUB_REPO = 'nato0012/college'; // Format: owner/repo
-        
+        const GITHUB_REPO = 'nato0012/college';
         let courseCount = 1;
         
         // Initialize the app
@@ -248,9 +251,24 @@
             // Add event listeners
             document.getElementById('add-course').addEventListener('click', addNewCourse);
             document.getElementById('calculate').addEventListener('click', calculateGPA);
-            document.getElementById('save-data').addEventListener('click', showGitHubModal);
-            document.getElementById('cancel-modal-btn').addEventListener('click', hideGitHubModal);
-            document.getElementById('save-modal-btn').addEventListener('click', saveToGitHubHandler);
+            document.getElementById('save-data').addEventListener('click', () => {
+                document.getElementById('save-modal').style.display = 'block';
+            });
+            document.getElementById('load-data').addEventListener('click', () => {
+                document.getElementById('load-modal').style.display = 'block';
+            });
+            
+            // Save modal buttons
+            document.getElementById('confirm-save-btn').addEventListener('click', saveToGitHubHandler);
+            document.getElementById('cancel-save-btn').addEventListener('click', () => {
+                document.getElementById('save-modal').style.display = 'none';
+            });
+            
+            // Load modal buttons
+            document.getElementById('confirm-load-btn').addEventListener('click', loadUserDataHandler);
+            document.getElementById('cancel-load-btn').addEventListener('click', () => {
+                document.getElementById('load-modal').style.display = 'none';
+            });
         });
 
         // Add new course row
@@ -308,45 +326,9 @@
             return courses;
         }
         
-        // Save to GitHub via API route
-        async function saveToGitHub(username, data) {
-            try {
-                const response = await fetch('/api/saveToGitHub', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        username: username,
-                        data: data
-                    }),
-                });
-
-                const result = await response.json();
-                
-                if (response.ok) {
-                    alert('Successfully saved to GitHub!');
-                } else {
-                    throw new Error(result.message || 'Failed to save to GitHub');
-                }
-            } catch (error) {
-                alert(`Error: ${error.message}`);
-            }
-        }
-
-        // Show GitHub modal
-        function showGitHubModal() {
-            document.getElementById('github-modal').style.display = 'block';
-        }
-
-        // Hide GitHub modal
-        function hideGitHubModal() {
-            document.getElementById('github-modal').style.display = 'none';
-        }
-
-        // Handle GitHub save
+        // Save to GitHub handler
         async function saveToGitHubHandler() {
-            const username = document.getElementById('github-username').value.trim();
+            const username = document.getElementById('save-username').value.trim();
             
             if (!username) {
                 alert('Please enter a username');
@@ -357,14 +339,48 @@
             const saveData = {
                 username: username,
                 courses: courses,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                metadata: {
+                    version: "1.0",
+                    generator: "GPA Calculator App"
+                }
             };
             
-            await saveToGitHub(username, saveData);
-            hideGitHubModal();
-        }
+            try {
+                const response = await fetch('/api/saveToGitHub', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        data: saveData
+                    }),
+                });
 
-        async function findUser(username) {
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('Successfully saved to GitHub!');
+                    document.getElementById('save-modal').style.display = 'none';
+                } else {
+                    throw new Error(result.message || 'Failed to save to GitHub');
+                }
+            } catch (error) {
+                console.error('Save error:', error);
+                alert(`Error saving to GitHub: ${error.message}`);
+            }
+        }
+        
+        // Load user data handler
+        async function loadUserDataHandler() {
+            const username = document.getElementById('load-username').value.trim();
+            
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+            
             try {
                 const response = await fetch(`/api/getUserData?username=${encodeURIComponent(username)}`);
                 if (!response.ok) {
@@ -379,35 +395,27 @@
                     
                     // Create rows for each course
                     userData.courses.forEach(course => {
-                        addNewCourse(); // Adds a new row
+                        addNewCourse();
                         const currentRow = document.getElementById(`row-${courseCount}`);
                         
                         // Fill the row with loaded data
-                        currentRow.querySelector('.course-name-input').value = course.name;
-                        currentRow.querySelector('.course-type-select').value = course.type;
-                        currentRow.querySelector('.semester1').value = course.semester1;
-                        currentRow.querySelector('.semester2').value = course.semester2;
+                        currentRow.querySelector('.course-name-input').value = course.name || '';
+                        currentRow.querySelector('.course-type-select').value = course.type || 'regular';
+                        currentRow.querySelector('.semester1').value = course.semester1 || '';
+                        currentRow.querySelector('.semester2').value = course.semester2 || '';
                     });
                     
-                    alert(`Loaded data for ${username}`);
+                    document.getElementById('load-modal').style.display = 'none';
+                    calculateGPA();
+                    alert(`Successfully loaded data for ${username}`);
                 } else {
-                    alert('No courses found for this user');
+                    throw new Error('No courses found for this user');
                 }
             } catch (error) {
-                console.error('Find user error:', error);
+                console.error('Load error:', error);
                 alert(`Error loading user data: ${error.message}`);
             }
         }
-        
-        // Add event listener for the Find User button
-        document.getElementById('find-user').addEventListener('click', async () => {
-            const username = document.getElementById('find-user-input').value.trim();
-            if (username) {
-                await findUser(username);
-            } else {
-                alert('Please enter a username');
-            }
-        });
         
         // Calculate GPA
         function calculateGPA() {
