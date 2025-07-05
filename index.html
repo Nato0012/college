@@ -15,34 +15,62 @@
         h1 {
             color: #333;
             text-align: center;
+            margin-bottom: 20px;
         }
-        .course-entry {
+        .gpa-table {
+            width: 100%;
             background-color: white;
-            padding: 15px;
-            margin-bottom: 15px;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
-        .course-header {
+        .table-header {
             display: flex;
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+            padding: 10px 15px;
+        }
+        .course-row {
+            display: flex;
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
             align-items: center;
-            margin-bottom: 10px;
-            gap: 10px;
         }
-        .semester-grades {
-            display: flex;
-            gap: 20px;
-            margin-left: 30px;
+        .course-row:last-child {
+            border-bottom: none;
         }
-        .semester {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
+        .course-name {
+            width: 150px;
+            margin-right: 10px;
         }
-        select, input {
+        .course-type {
+            width: 100px;
+            margin-right: 10px;
+        }
+        .semester-grade {
+            width: 80px;
+            margin-right: 15px;
+            text-align: center;
+        }
+        .remove-btn {
+            width: 100px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px;
+            cursor: pointer;
+        }
+        .remove-btn:hover {
+            background-color: #d32f2f;
+        }
+        input, select {
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
         }
         button {
             padding: 8px 15px;
@@ -51,7 +79,7 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            margin: 5px 0;
+            margin: 10px 0;
         }
         button:hover {
             background-color: #45a049;
@@ -63,45 +91,56 @@
             border-radius: 4px;
             display: none;
         }
-        #course-container {
-            margin-bottom: 20px;
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
         }
-        .remove-btn {
-            background-color: #f44336;
+        .result-column {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
         }
-        .remove-btn:hover {
-            background-color: #d32f2f;
+        .result-column h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
         }
-        .semester-label {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .course-name-input {
-            flex-grow: 1;
+        .header-label {
+            text-align: center;
         }
     </style>
 </head>
 <body>
     <h1>Semester GPA Calculator</h1>
     
-    <div id="course-container">
-        <div class="course-entry" id="course-1">
-            <div class="course-header">
-                <input type="text" class="course-name-input" placeholder="Course Name (optional)">
-                <select class="course-type">
-                    <option value="regular">Regular</option>
-                    <option value="ap">AP/Honors</option>
-                </select>
-                <button class="remove-btn" onclick="removeCourse(1)">Remove Course</button>
-            </div>
-            <div class="semester-grades">
-                <div class="semester">
-                    <div class="semester-label">Semester 1</div>
-                    <input type="text" class="letter-grade semester1" placeholder="Grade (A, B+, etc.)">
+    <div class="gpa-table">
+        <div class="table-header">
+            <div class="course-name">Course Name</div>
+            <div class="course-type">Type</div>
+            <div class="semester-grade">Semester 1</div>
+            <div class="semester-grade">Semester 2</div>
+            <div style="width: 100px;"></div>
+        </div>
+        <div id="course-rows">
+            <div class="course-row" id="row-1">
+                <div class="course-name">
+                    <input type="text" class="course-name-input" placeholder="Name">
                 </div>
-                <div class="semester">
-                    <div class="semester-label">Semester 2</div>
-                    <input type="text" class="letter-grade semester2" placeholder="Grade (A, B+, etc.)">
+                <div class="course-type">
+                    <select class="course-type-select">
+                        <option value="regular">Regular</option>
+                        <option value="ap">AP/Honors</option>
+                    </select>
+                </div>
+                <div class="semester-grade">
+                    <input type="text" class="letter-grade semester1" placeholder="Grade">
+                </div>
+                <div class="semester-grade">
+                    <input type="text" class="letter-grade semester2" placeholder="Grade">
+                </div>
+                <div>
+                    <button class="remove-btn" onclick="removeCourse(1)">Remove</button>
                 </div>
             </div>
         </div>
@@ -112,18 +151,18 @@
     
     <div id="results">
         <h2>GPA Results</h2>
-        <div style="display: flex; gap: 30px;">
-            <div>
+        <div class="results-grid">
+            <div class="result-column">
                 <h3>Semester 1</h3>
                 <p>Unweighted GPA: <span id="unweighted-gpa1">0.00</span></p>
                 <p>Weighted GPA: <span id="weighted-gpa1">0.00</span></p>
             </div>
-            <div>
+            <div class="result-column">
                 <h3>Semester 2</h3>
                 <p>Unweighted GPA: <span id="unweighted-gpa2">0.00</span></p>
                 <p>Weighted GPA: <span id="weighted-gpa2">0.00</span></p>
             </div>
-            <div>
+            <div class="result-column">
                 <h3>Overall</h3>
                 <p>Unweighted GPA: <span id="unweighted-gpa-total">0.00</span></p>
                 <p>Weighted GPA: <span id="weighted-gpa-total">0.00</span></p>
@@ -134,55 +173,55 @@
     <script>
         let courseCount = 1;
         
-        // Add new course field
+        // Add new course row
         document.getElementById('add-course').addEventListener('click', function() {
             courseCount++;
-            const newCourse = document.createElement('div');
-            newCourse.className = 'course-entry';
-            newCourse.id = 'course-' + courseCount;
-            newCourse.innerHTML = `
-                <div class="course-header">
-                    <input type="text" class="course-name-input" placeholder="Course Name (optional)">
-                    <select class="course-type">
+            const newRow = document.createElement('div');
+            newRow.className = 'course-row';
+            newRow.id = 'row-' + courseCount;
+            newRow.innerHTML = `
+                <div class="course-name">
+                    <input type="text" class="course-name-input" placeholder="Name">
+                </div>
+                <div class="course-type">
+                    <select class="course-type-select">
                         <option value="regular">Regular</option>
                         <option value="ap">AP/Honors</option>
                     </select>
-                    <button class="remove-btn" onclick="removeCourse(${courseCount})">Remove Course</button>
                 </div>
-                <div class="semester-grades">
-                    <div class="semester">
-                        <div class="semester-label">Semester 1</div>
-                        <input type="text" class="letter-grade semester1" placeholder="Grade (A, B+, etc.)">
-                    </div>
-                    <div class="semester">
-                        <div class="semester-label">Semester 2</div>
-                        <input type="text" class="letter-grade semester2" placeholder="Grade (A, B+, etc.)">
-                    </div>
+                <div class="semester-grade">
+                    <input type="text" class="letter-grade semester1" placeholder="Grade">
+                </div>
+                <div class="semester-grade">
+                    <input type="text" class="letter-grade semester2" placeholder="Grade">
+                </div>
+                <div>
+                    <button class="remove-btn" onclick="removeCourse(${courseCount})">Remove</button>
                 </div>
             `;
-            document.getElementById('course-container').appendChild(newCourse);
+            document.getElementById('course-rows').appendChild(newRow);
         });
         
-        // Remove course field
+        // Remove course row
         function removeCourse(id) {
             if (courseCount > 1) {
-                const courseToRemove = document.getElementById('course-' + id);
-                courseToRemove.remove();
+                const rowToRemove = document.getElementById('row-' + id);
+                rowToRemove.remove();
                 courseCount--;
             }
         }
         
         // Calculate GPA
         document.getElementById('calculate').addEventListener('click', function() {
-            const courses = document.querySelectorAll('.course-entry');
+            const rows = document.querySelectorAll('.course-row');
             let semester1 = { unweighted: 0, weighted: 0, count: 0 };
             let semester2 = { unweighted: 0, weighted: 0, count: 0 };
             let total = { unweighted: 0, weighted: 0, count: 0 };
             
-            courses.forEach(course => {
-                const type = course.querySelector('.course-type').value;
-                const grade1 = course.querySelector('.semester1').value.trim().toUpperCase();
-                const grade2 = course.querySelector('.semester2').value.trim().toUpperCase();
+            rows.forEach(row => {
+                const type = row.querySelector('.course-type-select').value;
+                const grade1 = row.querySelector('.semester1').value.trim().toUpperCase();
+                const grade2 = row.querySelector('.semester2').value.trim().toUpperCase();
                 
                 // Process Semester 1 grade
                 if (grade1) {
