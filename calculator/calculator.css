@@ -1,6 +1,6 @@
 body {
   font-family: Arial, sans-serif;
-  max-width: 900px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 20px;
 }
@@ -10,6 +10,7 @@ h1 {
     margin-bottom: 20px;
 }
 .gpa-table {
+    max-width: 900px;
     width: 100%;
     border-radius: 5px;
     background-color: white;
