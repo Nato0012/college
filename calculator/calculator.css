@@ -13,7 +13,7 @@ h1 {
 .gpa-table {
     width: 100%;
     border-radius: 5px;
-    background-color: white;
+    background-color: transparent;
     overflow: hidden;
 }
 .table-header, .course-row {
